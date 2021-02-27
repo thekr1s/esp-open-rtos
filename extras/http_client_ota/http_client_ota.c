@@ -215,6 +215,9 @@ OTA_err ota_update(ota_info *ota_info_par)
             goto dealloc_all;
         }
     }
+    // Free the large buffer to make mem available for setting active ROM image
+    free(http_inf.buffer);
+    http_inf.buffer = NULL;
     // Ping watch DOG
     vTaskDelayMs(500);
     {
@@ -247,7 +250,10 @@ OTA_err ota_update(ota_info *ota_info_par)
     }
 
 dealloc_all:
-    free(http_inf.buffer);
+
+    if (http_inf.buffer != NULL) {
+        free(http_inf.buffer);
+    }
 
     if (ota_inf->sha256_path != NULL) {
         free(sha256_ctx);
